@@ -491,6 +491,10 @@
 
 /* Large Desktop (> 1200px) */
 @media (min-width: 1200px) {
+  .app-header {
+    max-width: 910px;
+  }
+
   .body-wrapper {
     flex-direction: row;
     justify-content: center;
