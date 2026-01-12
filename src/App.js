@@ -43,7 +43,9 @@ const Icons = {
   Add: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
   Edit: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>,
   Settings: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
-  Logout: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+  Logout: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>,
+  Sun: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>,
+  Moon: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
 };
 
 function App() {
@@ -84,6 +86,21 @@ function App() {
     return { ...defaults, ...parsedSettings, visible: { ...defaults.visible, ...parsedSettings.visible } };
   });
 
+  // Темна тема
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [isDarkMode]);
+
   // Стан інтерфейсу
   const [indexA, setIndexA] = useState(0);
   const [indexB, setIndexB] = useState(0);
@@ -96,6 +113,16 @@ function App() {
   const [isSaving, setIsSaving] = useState(false);
 
   // --- ЕФЕКТИ ---
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isMenuOpen && !event.target.closest('.user-menu')) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -334,7 +361,32 @@ function App() {
     }
   };
 
+  const toggleTheme = () => setIsDarkMode(!isDarkMode);
+
   const getValue = (data, key) => data ? (data[key] || 0) : 0;
+
+  const fillWithLastData = () => {
+    if (historyData.length === 0) return;
+    const lastItem = historyData[0];
+    
+    // Знаходимо форму
+    const form = document.querySelector('form');
+    if (!form) return;
+
+    // Заповнюємо поля значеннями з останнього запису
+    activeFields.forEach(key => {
+      const val = getValue(lastItem, key);
+      // Перевіряємо, чи існує поле в формі, і встановлюємо значення
+      if (form.elements[key]) {
+        form.elements[key].value = val || '';
+      }
+    });
+    
+    // Окремо заповнюємо примітку, якщо вона є
+    if (form.elements['note']) {
+      form.elements['note'].value = lastItem.note || '';
+    }
+  };
 
   const getPartStyle = (id) => {
     const key = idMap[id];
@@ -415,6 +467,9 @@ function App() {
       <header className="app-header">
         <div className="logo">MyMetricsBody</div>
         <div className="user-menu">
+          <button className="theme-toggle" onClick={toggleTheme} title={isDarkMode ? "Світла тема" : "Темна тема"}>
+            {isDarkMode ? <Icons.Sun /> : <Icons.Moon />}
+          </button>
           <div className="avatar" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             <img src={user.photoURL} alt={user.displayName} />
           </div>
@@ -510,6 +565,9 @@ function App() {
               <div className="tooltip-title">{baseConfig[hoveredPart]?.label}</div>
               <div>{dataB?.Date}: <strong>{getValue(dataB, hoveredPart)}</strong></div>
               <div>{dataA?.Date}: {getValue(dataA, hoveredPart)}</div>
+              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+                Різниця: {renderDiff(getValue(dataA, hoveredPart), getValue(dataB, hoveredPart), baseConfig[hoveredPart]?.isFat)}
+              </div>
             </div>
           )}
 
@@ -559,8 +617,8 @@ function App() {
       
       {/* ADD / EDIT MODAL */}
       {(activeModal === 'add' || activeModal === 'edit' || activeModal === 'update') && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>{activeModal === 'edit' ? 'Редагування записів' : (activeModal === 'update' ? 'Редагування запису' : 'Новий запис')}</h3>
             
             {activeModal === 'edit' ? (
@@ -621,6 +679,15 @@ function App() {
                   </div>
                 </div>
                 <div className="modal-actions">
+                  <button 
+                    type="button" 
+                    className="btn btn-info" 
+                    onClick={fillWithLastData} 
+                    disabled={historyData.length === 0}
+                    style={{ marginRight: 'auto' }}
+                  >
+                    Заповнити даними
+                  </button>
                   <button type="button" className="btn btn-secondary" onClick={closeModal}>Скасувати</button>
                   <button type="submit" className="btn btn-success" disabled={isSaving}>
                     {isSaving ? 'Збереження...' : 'Зберегти'}
@@ -634,8 +701,8 @@ function App() {
 
       {/* SETTINGS MODAL */}
       {activeModal === 'settings' && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="modal-overlay" onClick={() => setActiveModal(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>Налаштування відображення</h3>
             
             <div className="settings-group">
