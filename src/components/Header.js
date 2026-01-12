@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Icons } from '../assets/images/Icons';
+import { Icons } from '../assets/Icons';
 
 export const Header = ({ user, isDarkMode, toggleTheme, handleLogout, setActiveModal, setEditingItem }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,7 +22,14 @@ export const Header = ({ user, isDarkMode, toggleTheme, handleLogout, setActiveM
           {isDarkMode ? <Icons.Sun /> : <Icons.Moon />}
         </button>
         <div className="avatar" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          <img src={user.photoURL} alt={user.displayName} />
+            <img 
+              src={user.photoURL} 
+              alt={user.displayName} 
+              onError={(e) => {
+                e.target.onerror = null; 
+                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=random`;
+              }}
+            />
         </div>
         {isMenuOpen && (
           <div className="dropdown-menu">

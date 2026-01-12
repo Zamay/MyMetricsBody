@@ -230,7 +230,7 @@ function App() {
     setUser({
       uid: 'guest',
       displayName: 'Тестовий Користувач',
-      photoURL: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'
+      photoURL: 'https://ui-avatars.com/api/?name=Test+User&background=random'
     });
     setIsGuest(true);
   };
@@ -417,43 +417,43 @@ function App() {
 
       <div className="main-layout">
         {historyData.length > 0 ? (
-          <StatsTable 
-            historyData={historyData}
-            activeFields={activeFields}
-            baseConfig={baseConfig}
-            getValue={getValue}
-            renderDiff={renderDiff}
-            indexA={indexA}
-            setIndexA={setIndexA}
-            indexB={indexB}
-            setIndexB={setIndexB}
+            <StatsTable 
+              historyData={historyData}
+              activeFields={activeFields}
+              baseConfig={baseConfig}
+              getValue={getValue}
+              renderDiff={renderDiff}
+              indexA={indexA}
+              setIndexA={setIndexA}
+              indexB={indexB}
+              setIndexB={setIndexB}
+              setHoveredPart={setHoveredPart}
+              hoveredPart={hoveredPart}
+              dataA={dataA}
+              dataB={dataB}
+            />
+          ) : (
+            <div className="data-container">
+              <div className="empty-state">
+                <p>У вас ще немає записів.</p>
+                <button className="btn btn-primary" onClick={() => setActiveModal('add')}>Додати перший замір</button>
+              </div>
+            </div>
+          )}
+
+          <BodyModel 
+            getPartStyle={getPartStyle}
+            idMap={idMap}
             setHoveredPart={setHoveredPart}
+            setTooltipPos={setTooltipPos}
             hoveredPart={hoveredPart}
+            tooltipPos={tooltipPos}
+            baseConfig={baseConfig}
             dataA={dataA}
             dataB={dataB}
+            getValue={getValue}
+            renderDiff={renderDiff}
           />
-        ) : (
-          <div className="data-container">
-            <div className="empty-state">
-              <p>У вас ще немає записів.</p>
-              <button className="btn btn-primary" onClick={() => setActiveModal('add')}>Додати перший замір</button>
-            </div>
-          </div>
-        )}
-
-        <BodyModel 
-          getPartStyle={getPartStyle}
-          idMap={idMap}
-          setHoveredPart={setHoveredPart}
-          setTooltipPos={setTooltipPos}
-          hoveredPart={hoveredPart}
-          tooltipPos={tooltipPos}
-          baseConfig={baseConfig}
-          dataA={dataA}
-          dataB={dataB}
-          getValue={getValue}
-          renderDiff={renderDiff}
-        />
       </div>
 
       {(activeModal === 'add' || activeModal === 'edit' || activeModal === 'update') && (
