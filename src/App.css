@@ -294,6 +294,11 @@
 }
 .btn-google:hover { background-color: #357ae8; }
 
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
 /* --- Header --- */
 .app-header {
   position: fixed;

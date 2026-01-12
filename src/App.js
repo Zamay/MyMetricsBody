@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import './App.css';
 import front from './assets/images/male-front.png';
 import back from './assets/images/male-back.png';
+import { getMockData } from './mockDataService';
 
 // Firebase
 import { auth, googleProvider, db } from './firebase';
@@ -47,6 +48,7 @@ const Icons = {
 
 function App() {
   const [user, setUser] = useState(null);
+  const [isGuest, setIsGuest] = useState(false);
   const [historyData, setHistoryData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -109,6 +111,16 @@ function App() {
       return;
     }
 
+    if (isGuest) {
+      const mockData = getMockData();
+      setHistoryData(mockData);
+      if (mockData.length > 0) {
+        setIndexB(0);
+        setIndexA(mockData.length > 1 ? 1 : 0);
+      }
+      return;
+    }
+
     const q = query(collection(db, `users/${user.uid}/measurements`), orderBy("Date", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -120,7 +132,7 @@ function App() {
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, isGuest]);
 
   useEffect(() => {
     localStorage.setItem('bodyMapSettings', JSON.stringify(settings));
@@ -230,8 +242,22 @@ function App() {
     }
   };
 
+  const handleGuestLogin = () => {
+    setUser({
+      uid: 'guest',
+      displayName: 'Тестовий Користувач',
+      photoURL: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'
+    });
+    setIsGuest(true);
+  };
+
   const handleLogout = () => {
-    signOut(auth);
+    if (isGuest) {
+      setIsGuest(false);
+      setUser(null);
+    } else {
+      signOut(auth);
+    }
     setIsMenuOpen(false);
   };
 
@@ -249,6 +275,26 @@ function App() {
     const note = formData.get('note');
     if (note) record.note = note;
 
+    if (isGuest) {
+      // Локальне збереження для гостя
+      setHistoryData(prev => {
+        let newData = [...prev];
+        if (editingItem?.id && editingItem.id !== date) {
+           newData = newData.filter(item => item.id !== editingItem.id);
+        }
+        const existingIndex = newData.findIndex(item => item.id === date);
+        if (existingIndex >= 0) {
+          newData[existingIndex] = { ...newData[existingIndex], ...record, id: date };
+        } else {
+          newData.push({ ...record, id: date });
+        }
+        return newData.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+      });
+      closeModal();
+      setIsSaving(false);
+      return;
+    }
+
     try {
       // Якщо ми редагуємо і дата змінилася, видаляємо старий запис
       if (editingItem?.id && editingItem.id !== date) {
@@ -256,14 +302,7 @@ function App() {
       }
 
       await setDoc(doc(db, `users/${user.uid}/measurements`, date), record, { merge: true });
-      setEditingItem(null);
-      
-      // Якщо ми були в режимі редагування (update), повертаємось до списку (edit)
-      if (activeModal === 'update') {
-        setActiveModal('edit');
-      } else {
-        setActiveModal(null);
-      }
+      closeModal();
     } catch (error) {
       console.error("Error saving:", error);
       alert("Помилка збереження");
@@ -272,8 +311,21 @@ function App() {
     }
   };
 
+  const closeModal = () => {
+    setEditingItem(null);
+    if (activeModal === 'update') {
+      setActiveModal('edit');
+    } else {
+      setActiveModal(null);
+    }
+  };
+
   const deleteRecord = async (dateId) => {
     if (window.confirm("Видалити цей запис?")) {
+      if (isGuest) {
+        setHistoryData(prev => prev.filter(item => item.id !== dateId));
+        return;
+      }
       try {
         await deleteDoc(doc(db, `users/${user.uid}/measurements`, dateId));
       } catch (error) {
@@ -345,6 +397,9 @@ function App() {
           <p>Візуалізуй зміни, слідкуй за кожним сантиметром, досягай цілей.</p>
           <button className="btn btn-google" onClick={handleLogin}>
             Увійти через Google
+          </button>
+          <button className="btn btn-secondary" style={{marginTop: '15px', width: '100%'}} onClick={handleGuestLogin}>
+            Увійти як Гість (Demo)
           </button>
         </div>
       </div>
@@ -566,10 +621,7 @@ function App() {
                   </div>
                 </div>
                 <div className="modal-actions">
-                  <button type="button" className="btn btn-secondary" onClick={() => {
-                    if (activeModal === 'update') setActiveModal('edit');
-                    else setActiveModal(null);
-                  }}>Скасувати</button>
+                  <button type="button" className="btn btn-secondary" onClick={closeModal}>Скасувати</button>
                   <button type="submit" className="btn btn-success" disabled={isSaving}>
                     {isSaving ? 'Збереження...' : 'Зберегти'}
                   </button>
